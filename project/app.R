@@ -81,8 +81,18 @@ ui <- navbarPage("Navigation", #clickable navbar
       
            ),
   
-  tabPanel("Plot 1", #Plot 1 page within these parentheses
-           mainPanel()),
+  tabPanel("Plot 1",
+           titlePanel("school year and phq score scatter plot"),
+           sidebarLayout(
+             sidebarPanel(
+               selectInput("bmi", "Choose a bmi type:",
+                           choices = c("normal", "overweight")),
+               p(strong("This plot produces a scatter plot in which users can select either view the normal weight or overweight result")),
+               p(em("this plot intends to explore which school year students have the highest phq score. Also, this plot explores whether gender and bmi type would result in change in phq score")),
+             ),
+             mainPanel(
+               plotOutput("plot1"),
+               textOutput("text1")))),
   
   # creating the widget where the user can select whether they want to see the stack bar graph
   # for either depression or anxiety & plotting the the stack bar graph in the mainPanel
@@ -151,9 +161,41 @@ ui <- navbarPage("Navigation", #clickable navbar
 #Define server
 server <- function(input, output) {
     
-    output$plot1 <- renderPlot({
-      #table
-    })
+    over_plot <- reactive({
+    if(input$bmi == "overweight"){
+      over_data <- mentalhealth %>%
+        filter(who_bmi == "Overweight")
+      ggplot(over_data, aes(x = school_year, y = phq_score, color = gender)) +
+        geom_point()+
+        geom_smooth()
+    }
+  })
+  norm_plot <- reactive({
+    if(input$bmi == "normal"){
+      norm_data <- mentalhealth %>%
+        filter(who_bmi == "Normal")
+      ggplot(norm_data, aes(x = school_year, y = phq_score, color = gender)) +
+        geom_point()+
+        geom_smooth()
+    }
+  })
+  output$plot1 <- renderPlot({
+    if(input$bmi == "overweight"){
+      over_plot()
+    } else if(input$bmi == "normal"){
+      norm_plot()
+    }
+  })
+  output$text1 <- renderText({
+    norm_data <- mentalhealth %>%
+      filter(who_bmi == "Normal" & !is.na(phq_score))
+    over_data <- mentalhealth %>%
+      filter(who_bmi == "Overweight" & !is.na(phq_score))
+    paste("The average phq score for normal weight people is:", round(mean(norm_data$phq_score), digits = 2),
+          "   The average phq score for overweight people is:", round(mean(over_data$phq_score), digits = 2))
+    
+    
+  })
     
     # using the reactive function and if statement so that the stack bar graph info will be produced
     # when the user selects to view the Depression stack bar graph & using ggplot to put the info
