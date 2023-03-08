@@ -9,6 +9,13 @@
 
 library(shiny)
 library(markdown)
+library(tidyverse)
+
+mentalhealth <- read_delim("depression_anxiety_data.csv")
+score <- c("0-4", "5-9", "10-14", "15+")
+anxiety_depression <- c("none", "mild", "moderate", "severe")
+phq_gad <- data_frame(score, anxiety_depression)
+
 
 #Define UI
 ui <- navbarPage("Navigation", #clickable navbar
@@ -84,7 +91,7 @@ ui <- navbarPage("Navigation", #clickable navbar
                            choices = c("Depression", "Anxiety")),
                p(strong("This plot, produces a stack bar graph in which the user selects to either view the Depression or Anxiety results.")),
                p(em("The graph counts the number of students who fall in a certain category which measures the severity of the respective mental",
-                    " illness & counts the number of students who are diagnosed with the mental illness."))
+                    " illness & counts the number of students who are diagnosed with the mental illness.")),
              ),
              mainPanel(
                plotOutput("plot"),
@@ -94,6 +101,7 @@ ui <- navbarPage("Navigation", #clickable navbar
   ),
   
   tabPanel("Table", #Table page within these parentheses
+           titlePanel("Average Anxiety and Depression Table"),
            sidebarLayout(
              sidebarPanel(
                checkboxGroupInput("options", "Choose option(s):",
@@ -103,20 +111,12 @@ ui <- navbarPage("Navigation", #clickable navbar
                                               "Sleepiness" = "sleepiness"),
                                   selected = c("School Year" = "school_year",
                                                "Gender" = "gender")),
-               p("Anxiety: displays the average gad_score"),
-               p("gad_score scale:"),
-               p("0-4: Minimal Anxiety"),
-               p("5-9: Mild Anxiety"),
-               p("10-14: Moderate Anxiety"),
-               p("Greate than 15: Severe Anxiety"),
-               p("phq_score scale:"),
-               p("Depression: displays the average phq_score"),
-               p("phq_score scale:"),
-               p("0-4: Minimal Depression"),
-               p("5-9: Mild Depression"),
-               p("10-14: Moderate Depression"),
-               p("Greate than 15: Severe Depression"),
+               p(strong("The table displays the average phq_score (Depression) and gad_score (Anxiety) for the data.")),
+               p("The check boxes allows users to group the data by different variables. This allows users to see which variables affect depression and anxiety levels in students more."),
+               tableOutput("score"),
+               p(em("The table above displays the anxiety and depression severity based on the phq/gad scores.")),
                textOutput("text"),
+               
              ),
              mainPanel(tableOutput("table")))),
   
@@ -140,8 +140,9 @@ server <- function(input, output) {
     # on the graph, but the graph is not produced as output here.
     depression_graph <- reactive({
       if (input$graph_type == "Depression"){
-        depression_count <- mental_health %>%
+        depression_count <- mentalhealth %>%
           filter(!is.na(depression_severity) & depression_severity != "NA") %>%
+          filter(!is.na(depression_diagnosis)) %>% 
           group_by(depression_severity, depression_diagnosis) %>%
           summarise(count = n()) %>%
           mutate(depression_diagnosis = factor(depression_diagnosis, levels = c("TRUE", "FALSE")))
@@ -159,7 +160,7 @@ server <- function(input, output) {
     # on the graph, but the graph is not produced as output here.
     anxiety_graph <- reactive({
       if(input$graph_type == "Anxiety"){
-        anxiety_count <- mental_health %>%
+        anxiety_count <- mentalhealth %>%
           filter(!is.na(anxiety_severity) & anxiety_severity != "NA") %>%
           group_by(anxiety_severity, anxiety_diagnosis) %>%
           summarise(count = n()) %>%
@@ -204,7 +205,6 @@ server <- function(input, output) {
         filter(!is.na(gad_score)) %>% 
         group_by(mh_table()) %>%
         summarise(Anxiety = mean(gad_score, na.rm = TRUE), .groups = "drop") %>%
-        top_n(1, Anxiety) %>%
         pull(Anxiety) %>% 
         max()
       
@@ -213,12 +213,15 @@ server <- function(input, output) {
         filter(!is.na(gad_score)) %>% 
         group_by(mh_table()) %>%
         summarise(Depression = mean(phq_score, na.rm = TRUE), .groups = "drop") %>% 
-        top_n(1, Depression) %>%
         pull(Depression) %>% 
         max()
       paste("The maximum average anxiety score is:", round(max_anxiety, digits = 2),
             "The maximum average depression score is:", round(max_depression, digits = 2))
       
+    })
+    
+    output$score <- renderTable({
+      phq_gad
     })
 }
 
