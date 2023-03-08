@@ -160,8 +160,7 @@ ui <- navbarPage("Navigation", #clickable navbar
 
 #Define server
 server <- function(input, output) {
-    
-    over_plot <- reactive({
+  over_plot <- reactive({
     if(input$bmi == "overweight"){
       over_data <- mentalhealth %>%
         filter(who_bmi == "Overweight")
