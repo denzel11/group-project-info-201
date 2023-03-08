@@ -74,8 +74,18 @@ ui <- navbarPage("Navigation", #clickable navbar
   tabPanel("Plot 1", #Plot 1 page within these parentheses
            mainPanel()),
   
-  tabPanel("Plot 2", #Plot 2 page within these parentheses
-           mainPanel()),
+  tabPanel("Plot 2",
+           titlePanel("Depression & Anxiety Stack Bar Graphs"),#Plot 2 page within these parentheses
+           sidebarLayout(
+             sidebarPanel(
+               selectInput("graph_type", "Choose a Graph:",
+                           choices = c("Depression", "Anxiety"))
+             ),
+             mainPanel(
+               plotOutput("plot")
+             )
+           )
+  ),
   
   tabPanel("Table", #Table page within these parentheses
            sidebarLayout(
@@ -119,8 +129,44 @@ server <- function(input, output) {
       #table
     })
     
-    output$plot2 <- renderPlot({
-      #bar graph
+    depression_graph <- reactive({
+      if (input$graph_type == "Depression"){
+        depression_count <- mental_health %>%
+          filter(!is.na(depression_severity) & depression_severity != "NA") %>%
+          group_by(depression_severity, depression_diagnosis) %>%
+          summarise(count = n()) %>%
+          mutate(depression_diagnosis = factor(depression_diagnosis, levels = c("TRUE", "FALSE")))
+        
+        ggplot(depression_count, aes(x = depression_severity, y = count, fill = depression_diagnosis)) +
+          geom_bar(stat = "identity", position = "stack") +
+          labs(x = "Depression Severity", y = "Count") +
+          scale_fill_manual(values = c("light blue", "dark red"), name = "Depression Diagnosis",
+                            labels = c("True", "False"))
+      }
+    })
+    
+    anxiety_graph <- reactive({
+      if(input$graph_type == "Anxiety"){
+        anxiety_count <- mental_health %>%
+          filter(!is.na(anxiety_severity) & anxiety_severity != "NA") %>%
+          group_by(anxiety_severity, anxiety_diagnosis) %>%
+          summarise(count = n()) %>%
+          mutate(anxiety_diagnosis = factor(anxiety_diagnosis, levels = c("TRUE", "FALSE")))
+        
+        ggplot(anxiety_count, aes(x = anxiety_severity, y = count, fill = anxiety_diagnosis)) +
+          geom_bar(stat = "identity", position = "stack") +
+          labs(x = "Anxiety Severity", y = "Count") +
+          scale_fill_manual(values = c("light blue", "dark red"), name = "Anxiety Diagnosis",
+                            labels = c("True", "False"))
+      }  
+    })
+    
+    output$plot <- renderPlot({
+      if(input$graph_type == "Depression"){
+        depression_graph()
+      } else if(input$graph_type == "Anxiety"){
+        anxiety_graph()
+      }
     })
     
     #Table
