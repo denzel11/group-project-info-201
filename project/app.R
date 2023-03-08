@@ -31,7 +31,20 @@ ui <- navbarPage("Navigation", #clickable navbar
                 p("Gender: Student's gender categorized as male or female"),
                 p("BMI: Body mass index in continuous numerical form"),
                 p("Who BMI: Body mass index by category"),
-                p("PHQ score: "),
+                p("PHQ score: Depression symptoms scored on a scale of 0-27"),
+                p("Depression severity: A categorical scale of depression symptoms"),
+                p("Depressiveness: True/false if student is depressive"),
+                p("Suicidal: True/false if student is suicidal"),
+                p("Depression diagnosis: True/false if student has a depression diagnosis"),
+                p("Depression treatment: True/false if student is receiving treatment for depression"),
+                p("GAD score: Anxiety symptoms scored on a scale of 0-21"),
+                p("Anxiety severity: A categorical scale of anxiety symptoms"),
+                p("Anxiousness: True/false if student has anxiousness"),
+                p("Anxiety diagnosis: True/false if student has an anxiety diagnosis"),
+                p("Anxiety treatment: True/false if student is receiving treatment for anxiety"),
+                p("Epworth score: A scale of sleepiness from 0-12"),
+                p("Sleepiness: True/false if student experiences sleepiness"),
+                
                 h2("What we want to find:"),
                 p("Our goal is to assess how many of the students experience anxiety
                   and depression. Our", em("main audience"), "is the college educators
@@ -40,6 +53,8 @@ ui <- navbarPage("Navigation", #clickable navbar
                   to analyze attributes of students who have or can access treatment,
                   and if there is any stronger prevalence of anxiety/depression
                   by year in school."),
+                
+                
                 h2("Potential issues:"),
                 p("An", em("ethical"), "issue we quickly noticed was the students' BMI
                   (body mass index) in numerical form and category. While this 
@@ -66,7 +81,9 @@ ui <- navbarPage("Navigation", #clickable navbar
            mainPanel()),
   
   tabPanel("Conclusion",
-           mainPanel())
+           titlePanel("Conclusion"),
+           mainPanel()
+           )
   
 )
 
