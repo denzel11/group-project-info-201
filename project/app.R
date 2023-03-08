@@ -74,15 +74,21 @@ ui <- navbarPage("Navigation", #clickable navbar
   tabPanel("Plot 1", #Plot 1 page within these parentheses
            mainPanel()),
   
+  # creating the widget where the user can select whether they want to see the stack bar graph
+  # for either depression or anxiety & plotting the the stack bar graph in the mainPanel
   tabPanel("Plot 2",
            titlePanel("Depression & Anxiety Stack Bar Graphs"),#Plot 2 page within these parentheses
            sidebarLayout(
              sidebarPanel(
                selectInput("graph_type", "Choose a Graph:",
-                           choices = c("Depression", "Anxiety"))
+                           choices = c("Depression", "Anxiety")),
+               p(strong("This plot, produces a stack bar graph in which the user selects to either view the Depression or Anxiety results.")),
+               p(em("The graph counts the number of students who fall in a certain category which measures the severity of the respective mental",
+                    " illness & counts the number of students who are diagnosed with the mental illness."))
              ),
              mainPanel(
-               plotOutput("plot")
+               plotOutput("plot"),
+               textOutput("selected_graph")
              )
            )
   ),
@@ -129,6 +135,9 @@ server <- function(input, output) {
       #table
     })
     
+    # using the reactive function and if statement so that the stack bar graph info will be produced
+    # when the user selects to view the Depression stack bar graph & using ggplot to put the info
+    # on the graph, but the graph is not produced as output here.
     depression_graph <- reactive({
       if (input$graph_type == "Depression"){
         depression_count <- mental_health %>%
@@ -145,6 +154,9 @@ server <- function(input, output) {
       }
     })
     
+    # using the reactive function and if statement so that the stack bar graph info will be produced
+    # when the user selects to view the Anxiety stack bar graph & using ggplot to put the info
+    # on the graph, but the graph is not produced as output here.
     anxiety_graph <- reactive({
       if(input$graph_type == "Anxiety"){
         anxiety_count <- mental_health %>%
@@ -161,6 +173,8 @@ server <- function(input, output) {
       }  
     })
     
+    # using the renderPlot function and an if/else if statement to actually print the graphs
+    # depending if the user selects to the Depression or Anxiety graph
     output$plot <- renderPlot({
       if(input$graph_type == "Depression"){
         depression_graph()
@@ -168,8 +182,6 @@ server <- function(input, output) {
         anxiety_graph()
       }
     })
-    
-    #Table
     
     mh_table <- reactive({ 
       mentalhealth %>%
