@@ -77,8 +77,33 @@ ui <- navbarPage("Navigation", #clickable navbar
   tabPanel("Plot 2", #Plot 2 page within these parentheses
            mainPanel()),
   
-  tabPanel("Plot 3", #Plot 3 page within these parentheses
-           mainPanel()),
+  tabPanel("Table", #Table page within these parentheses
+           sidebarLayout(
+             sidebarPanel(
+               checkboxGroupInput("options", "Choose option(s):",
+                                  choices = c("School Year" = "school_year",
+                                              "Age" = "age",
+                                              "Gender" = "gender",
+                                              "Sleepiness" = "sleepiness"),
+                                  selected = c("School Year" = "school_year",
+                                               "Gender" = "gender")),
+               p("Anxiety: displays the average gad_score"),
+               p("gad_score scale:"),
+               p("0-4: Minimal Anxiety"),
+               p("5-9: Mild Anxiety"),
+               p("10-14: Moderate Anxiety"),
+               p("Greate than 15: Severe Anxiety"),
+               p("phq_score scale:"),
+               p("Depression: displays the average phq_score"),
+               p("phq_score scale:"),
+               p("0-4: Minimal Depression"),
+               p("5-9: Mild Depression"),
+               p("10-14: Moderate Depression"),
+               p("Greate than 15: Severe Depression"),
+               textOutput("text"),
+             ),
+             mainPanel(tableOutput("table")))),
+  
   
   tabPanel("Conclusion",
            titlePanel("Conclusion"),
@@ -98,10 +123,45 @@ server <- function(input, output) {
       #bar graph
     })
     
-    output$plot3 <- renderPlot({
-      #third plot
+    #Table
+    
+    mh_table <- reactive({ 
+      mentalhealth %>%
+        select(input$options)
     })
     
+    output$table <- renderTable({ 
+      mentalhealth %>%
+        filter(!is.na(phq_score)) %>% 
+        filter(!is.na(gad_score)) %>% 
+        group_by(mh_table()) %>%
+        summarise(Anxiety = mean(gad_score, na.rm = TRUE),
+                  Depression = mean(phq_score, na.rm = TRUE), .groups = "drop")
+    })
+    
+    
+    output$text <- renderText({
+      max_anxiety <- mentalhealth %>%
+        filter(!is.na(phq_score)) %>% 
+        filter(!is.na(gad_score)) %>% 
+        group_by(mh_table()) %>%
+        summarise(Anxiety = mean(gad_score, na.rm = TRUE), .groups = "drop") %>%
+        top_n(1, Anxiety) %>%
+        pull(Anxiety) %>% 
+        max()
+      
+      max_depression <- mentalhealth %>%
+        filter(!is.na(phq_score)) %>% 
+        filter(!is.na(gad_score)) %>% 
+        group_by(mh_table()) %>%
+        summarise(Depression = mean(phq_score, na.rm = TRUE), .groups = "drop") %>% 
+        top_n(1, Depression) %>%
+        pull(Depression) %>% 
+        max()
+      paste("The maximum average anxiety score is:", round(max_anxiety, digits = 2),
+            "The maximum average depression score is:", round(max_depression, digits = 2))
+      
+    })
 }
 
 # Run the application 
