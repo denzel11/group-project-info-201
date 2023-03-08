@@ -24,7 +24,7 @@ ui <- navbarPage("Navigation", #clickable navbar
             sidebarLayout(
               sidebarPanel(
                 p(em("Project by: Mackenzie Kimbrough, Paul Garces, Yi Zhou, and 
-                 Vanessa Sakdy"))
+                 Vanessa Sakdy (Group BD3)"))
               ),
               
               mainPanel(
@@ -59,7 +59,9 @@ ui <- navbarPage("Navigation", #clickable navbar
                   students. Specifically, we would like to use the data we have
                   to analyze attributes of students who have or can access treatment,
                   and if there is any stronger prevalence of anxiety/depression
-                  by year in school."),
+                  by year in school. Most importantly, we aim to visualize the
+                  data so that it becomes digestible and presents the data in a way
+                  where one can learn from it."),
                 
                 
                 h2("Potential issues:"),
@@ -71,7 +73,8 @@ ui <- navbarPage("Navigation", #clickable navbar
                   were properly protected as this data contains sensitive information.
                   One of the notable limits of this dataset is that many of the 
                   variables are in true/false form, which makes numerical visualizations
-                  limited.")
+                  limited. There are also N/A values in rows that otherwise are filled
+                  with data. This may affect the sampling of the data.")
               )
               
             ),
@@ -123,7 +126,24 @@ ui <- navbarPage("Navigation", #clickable navbar
   
   tabPanel("Conclusion",
            titlePanel("Conclusion"),
-           mainPanel()
+           mainPanel(
+             p("This small study allows viewers to gather a preliminary idea of 
+               how and which students experience levels of depression and anxiety."),
+             p(strong("Conclusion 1: "), "Mental health issues are severely underdiagnosed.
+               In all categories of severity, there is a considerable portion of
+               students who have depression and anxiety based off their survey
+               scores but are undiagnosed. This pattern of underdiagnosed illnesses
+               suggests that students' mental health is not receiving proper attention."),
+             p(strong("Conclusion 2: "), "Based off of averaged (mean) survey scores,
+               anxiety and depression are more prevalent in first and second year
+               students. This trend is not seen in the averages based on age, suggesting
+               that year in school may be relevant in students' mental health status,
+               regardless of their age."),
+             p(strong("Conclusion 3: "), "Anxiety and depression scores are, on average,
+               higher for female students than their male counterparts. However,
+               both genders' scores are within range for some level of illness that
+               may cause concern.")
+           )
            )
   
 )
